@@ -1,0 +1,7 @@
+call_id,latency_ms,tool_failure,transcription_mismatch,ml_prediction,failure_category,recommended_action,context_loss_rule_applied,actual_failure_resolved
+CALL_001,400,0,0,no_failure,no_failure,no_recovery_needed_monitor_normally,False,not_verified
+CALL_002,700,0,1,speech_mismatch,speech_recognition_mismatch,request_value_confirmation,False,not_verified
+CALL_003,3000,1,0,technical_failure,technical_failure,check_service_and_transaction_status,False,not_verified
+CALL_004,11000,0,0,high_latency,high_latency,inspect_latency_and_processing_state,False,not_verified
+CALL_005,15000,0,0,high_latency,high_latency,inspect_latency_and_processing_state,False,not_verified
+CALL_006,350,0,0,no_failure,no_failure,no_recovery_needed_monitor_normally,False,not_verified

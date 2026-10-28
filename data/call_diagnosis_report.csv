@@ -1,0 +1,7 @@
+call_id,diagnosis,first_flagged_time,evidence,confidence,additional_flagged_issues,call_end_status,call_end_details,investigation_status
+CALL_001,no_failure_detected_by_rules,,No configured failure rule was triggered.,not_applicable,,normal,Conversation completed,no_issue_flagged
+CALL_002,speech_recognition_mismatch,10:01:03,Possible amount transcription mismatch,medium,,unknown,Call ended before confirmation,issue_detected
+CALL_003,technical_failure,10:02:08,Booking service timeout,high,,unknown,Call ended after incomplete workflow,issue_detected
+CALL_004,high_latency,10:03:15,agent_response took 11000 ms; threshold is 5000 ms,high,,normal,Conversation completed,issue_detected
+CALL_005,high_latency,10:04:05,agent_processing took 15000 ms; threshold is 5000 ms,high,,unknown,Customer or network termination not confirmed,issue_detected
+CALL_006,possible_context_loss,10:05:07,Agent repeated a question already answered,medium,,unknown,Conversation ended after repeated question,issue_detected

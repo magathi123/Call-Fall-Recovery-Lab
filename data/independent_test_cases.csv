@@ -1,0 +1,14 @@
+
+latency_ms,tool_failure,transcription_mismatch,expected_failure_type,scenario_note
+250,0,0,no_failure,Fast response with no detected errors
+1800,0,0,no_failure,Moderate response time with no detected errors
+6200,0,0,high_latency,Slow response without tool or speech errors
+12000,0,0,high_latency,Very slow response without other detected errors
+300,1,0,technical_failure,Fast response but tool call failed
+9000,1,0,technical_failure,Slow response and tool call failed
+400,0,1,speech_mismatch,Fast response but speech was transcribed incorrectly
+7000,0,1,speech_mismatch,Slow response with a speech transcription mismatch
+500,1,1,technical_failure,Tool failure and transcription mismatch detected
+7000,1,1,technical_failure,Slow response with both tool and transcription errors
+4500,0,0,high_latency,Response time exceeds the chosen latency threshold
+3000,0,1,speech_mismatch,Moderate response time with a transcription mismatch
