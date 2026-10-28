@@ -1,206 +1,207 @@
-# AI Agent Recovery Lab
-### Diagnosing AI Agent Failures and Recommending Recovery Actions
+# Call-Fall Recovery Lab
+### Diagnosing Voice AI Failures and Designing Safer Recovery Experiences
 
-## 1. Overview
+**A prototype exploring how voice AI products can detect failures, recommend safe recovery actions, and measure whether the user can successfully complete their task.**
 
-AI agents can fail in several ways during a conversation. They may respond slowly, encounter tool or service failures, or misunderstand a user's spoken input.
+## 1. The Problem
 
-The **AI Agent Recovery Lab** is a prototype that explores how these failures can be diagnosed and how appropriate recovery actions can be recommended.
+Voice AI agents can fail in ways that directly affect user experience: speech may be misrecognized, tool calls may fail, responses may be delayed, or the agent may lose track of information already provided by the user.
 
-The project combines rule-based diagnosis, a machine learning classifier, recovery-action mapping, and scenario-based simulation to demonstrate a structured approach to improving AI agent reliability.
+Detecting an error is only the first step. A reliable AI product must also decide what to do next.
 
-**Project focus:** AI Product Analytics, failure diagnosis, recovery workflows, and system evaluation.
+Should it retry? Ask the user to confirm an input? Check whether a transaction has already completed? Or hand the conversation to a human?
 
-## 2. Problem Statement
+An inappropriate recovery can make the experience worse. For example, blindly retrying a transaction when its status is unknown could cause a duplicate action.
 
-When an AI agent encounters an error, simply detecting that something went wrong is not enough. The system needs to identify the likely failure category and determine an appropriate next step.
+**Product question:** How might we help a voice AI system identify failures, choose a safe next step, and determine whether that step actually helped the user?
 
-For example:
-- High latency may require investigating processing time and system state.
-- A tool failure may require checking service and transaction status.
-- A speech-recognition mismatch may require confirming the user's intended input.
-- A conversation without detected failures may not require recovery.
+## 2. Project Objective
 
-This project explores how to connect failure signals to actionable recovery recommendations.
+Call-Fall Recovery Lab is a Python prototype that explores a failure-to-recovery workflow for voice AI systems.
 
-## 3. Project Objectives
+The current implementation experiments with:
+- Diagnosing failures from observable signals.
+- Using a Decision Tree classifier to categorize selected failure scenarios.
+- Mapping predicted categories to predefined recovery recommendations.
+- Simulating recovery scenarios.
+- Evaluating diagnosis consistency and recovery-action mappings.
 
-- Identify common AI agent failure categories from observable signals.
-- Train a Decision Tree classifier to categorize failures.
-- Map predicted failure categories to recovery recommendations.
-- Simulate predefined recovery success and failure scenarios.
-- Evaluate classification results and verify recovery-action mappings.
-- Identify limitations and areas for further validation.
+The broader product goal is to move beyond classification accuracy and understand whether failure handling improves task completion, reduces repeated failures, and protects users from unsafe recovery behavior.
 
-## 4. System Architecture
+## 3. How the System Works
 
-The prototype follows this workflow:
+1. **Capture signals:** Use synthetic call events containing latency, tool-failure indicators, and transcription-mismatch indicators.
+2. **Diagnose:** Predict a failure category using a Decision Tree classifier.
+3. **Recommend:** Map the diagnosis to a predefined recovery action.
+4. **Simulate:** Evaluate selected scenarios using predefined outcome conditions.
+5. **Evaluate:** Compare predictions and recommended actions against expected scenario labels.
+6. **Plan product measurement:** Define the real-world outcome data needed to establish whether recovery improves user experience.
 
-1. **Input signals:** Collect latency, tool-failure indicators, and transcription-mismatch indicators.
-2. **Failure diagnosis:** Use a Decision Tree classifier to predict a failure category.
-3. **Recovery recommendation:** Map the predicted category to a predefined recovery action.
-4. **Recovery simulation:** Test predefined scenarios representing successful and unsuccessful recovery conditions.
-5. **Evaluation:** Compare predictions with expected diagnoses and verify action mappings.
+The current workflow is a prototype. It does not connect to a live voice agent, execute real recovery operations, or measure real customer outcomes.
 
-The prototype uses synthetic training data and designed test scenarios. It does not connect to a live AI voice agent or execute real recovery operations.
+## 4. Failure Types and Example Recovery Policies
 
-## 5. Failure Categories and Recovery Actions
+| Failure type | Example response | Safety consideration |
+|---|---|---|
+| `speech_mismatch` | Confirm the misunderstood value | Avoid repeating an incorrect assumption |
+| `technical_failure` | Inspect service and transaction status | Do not blindly retry an operation with unknown status |
+| `high_latency` | Inspect processing state and decide whether to wait or recover | Avoid unnecessary retries while work is still running |
+| `no_failure` | Continue normal interaction and monitor | Avoid unnecessary interruptions |
 
-| Failure category | Recommended action |
-|---|---|
-| `no_failure` | `no_recovery_needed` |
-| `high_latency` | `inspect_latency_and_processing_state` |
-| `technical_failure` | `check_service_and_transaction_status` |
-| `speech_mismatch` | `request_value_confirmation` |
+These are example policies, not validated production decisions. A real system would also need to consider multiple simultaneous failures, model confidence, task context, retry limits, and escalation rules.
 
-These mappings represent the prototype's predefined recovery policy. They are recommendations, not proof that an action will resolve a real incident.
+## 5. Technical Approach
 
-## 6. Technology Stack
+**Current technologies**
+- Python
+- Pandas
+- Scikit-learn
+- CSV-based synthetic datasets and evaluation reports
 
-- **Python** — pipeline implementation and evaluation
-- **Pandas** — dataset processing and CSV reporting
-- **Scikit-learn** — Decision Tree classification and evaluation metrics
-- **CSV** — training data, test cases, predictions, and reports
-- **VS Code** — development environment
-
-## 7. Machine Learning Approach
-
-The project uses a Decision Tree classifier with a maximum depth of four.
-
-### Input features
-
+**Current model inputs**
 - `latency_ms`
 - `tool_failure`
 - `transcription_mismatch`
 
-### Target variable
+**Prediction target:** `failure_type`
 
-`failure_type`
+The repository contains a Decision Tree experiment trained on synthetic data. Its current features and labels are deliberately limited and do not represent the full complexity of real voice conversations.
 
-The training dataset contains 500 synthetic examples across four failure categories.
+A key next step is to compare the model against a transparent rules-based baseline using a documented labeling policy, noisy examples, overlapping failures, and a genuinely held-out evaluation set.
 
-The classifier predicts the category associated with an input scenario. A separate mapping then converts the predicted category into a recovery recommendation.
+The project should not assume that machine learning is necessary: if a simpler rules-based system performs just as well and is easier to validate, that may be the better product decision.
 
-Because the training labels follow predictable patterns derived from the input features, the model's performance on this dataset should not be interpreted as evidence of production-level accuracy.
+## 6. Evaluation: What the Current Results Mean
 
-## 8. Evaluation and Results
+The existing evaluation includes 12 manually designed scenarios and reports that all 12 match their expected diagnosis and recovery-action mappings.
 
-An independent scenario dataset containing 12 manually designed test cases was used to evaluate the classifier and its recovery-action mapping.
+However, the synthetic labels follow predictable rules derived from the same input signals, and the test scenarios may reproduce those rules. Therefore, the reported 100% scenario result is **not evidence of real-world model accuracy or successful recovery**.
 
-### Results
+The current evaluation is best interpreted as an initial consistency check of the defined scenarios and action mapping.
 
-| Evaluation measure | Result |
-|---|---:|
-| Test scenarios | 12 |
-| Correct diagnoses | 12/12 |
-| Scenario diagnosis accuracy | 100% |
-| Correct recovery-action mappings | 12/12 |
-| End-to-end evaluation passes | 12/12 |
+The next evaluation will compare:
+- A transparent rules-based baseline.
+- A Decision Tree classifier.
+- Performance on overlapping and noisy failure signals.
+- Failure-specific precision, recall, and confusion matrices where appropriate.
+- Incorrect and unsafe recovery recommendations.
+- Performance on test scenarios that were not used to define the decision policy or train the model.
 
-The end-to-end evaluation passes when both the predicted diagnosis matches the expected diagnosis and the recommended action matches the action assigned to that expected diagnosis.
+Evaluation results will be reported only after these experiments are implemented and run.
 
-### Interpretation
+## 7. Product Analytics: Metrics to Add
 
-All 12 designed scenarios passed the defined evaluation checks. The results demonstrate consistency between the model's predictions, the expected labels, and the predefined action mapping for these test cases.
+The following are proposed metrics for a future analytics layer. They are not yet measured on real users.
 
-However, the test dataset is small and synthetic. It shares the same input features as the training data, and its expected labels follow a predefined diagnosis policy. The evaluation therefore does not establish generalization to real-world conversations or prove that recovery actions successfully resolve failures.
+| Metric | Why it matters |
+|---|---|
+| Task completion rate | Did the user finish the intended task? |
+| Recovery success rate | Did an attempted recovery lead to a successful task outcome? |
+| Repeat-failure rate | Did the same failure happen again in the same interaction? |
+| Unnecessary recovery rate | Did the system intervene when no intervention was needed? |
+| Escalation rate | How often did the interaction require a human? |
+| Time to task completion | Did recovery help users finish faster or introduce more delay? |
 
-## 9. Recovery Simulation
+Metrics need explicit denominators and event definitions. For example, recovery success should be calculated over eligible recovery attempts with a known outcome—not inferred from a model prediction or a simulated flag.
 
-The project also includes a recovery simulation that evaluates predefined success and failure paths for selected failure categories.
+### Proposed prioritization framework
 
-Examples include:
-- Checking whether a customer confirms a corrected speech-recognition value.
-- Checking whether transaction status is known after a technical failure.
-- Checking whether processing completes after a latency issue.
-- Checking whether conversation context is restored appropriately.
+Failure types could be prioritized using:
 
-These outcomes are determined by predefined scenario conditions. They are simulated results, not observations from a production system.
+**Expected impact = frequency × severity × estimated cost per occurrence**
 
-## 10. Project Structure
+This is a proposed decision framework. Real prioritization would require reliable event volumes, outcome data, severity definitions, and cost estimates. The framework should also account for safety risks that cannot be reduced to financial cost alone.
 
-The project includes the following scripts and data files:
+## 8. Safety and Product Decisions
 
-```text
-ai-agent-recovery-lab/
-├── data/
-│   ├── ml_training_dataset.csv
-│   ├── independent_test_cases.csv
-│   ├── independent_evaluation_results.csv
-│   ├── recovery_action_evaluation.csv
-│   ├── ml_recovery_recommendations_v2.csv
-│   ├── ml_recovery_simulation_results_v2.csv
-│   ├── ml_recovery_simulation_results_v3.csv
-│   └── pipeline_evaluation_results.csv
-├── recovery_simulator.py
-├── train_ml_classifier.py
-├── ml_recovery_integration_v2.py
-├── recovery_simulator_v2.py
-├── recovery_simulator_v3.py
-├── evaluate_recovery_pipeline.py
-├── evaluate_independent_model.py
-├── evaluate_recovery_actions.py
-└── README.md
-```
+The project highlights several decisions that matter in AI product design:
 
-The files listed above represent the project's documented workflow and expected outputs. Some output files are generated when their corresponding scripts run.
+- **Retry versus verify:** Check operation status before retrying an action that may have already succeeded.
+- **Clarify versus assume:** Confirm uncertain speech-recognition results instead of acting on potentially incorrect values.
+- **Automate versus escalate:** Use human review when the system cannot establish a safe next action.
+- **Rules versus ML:** Introduce a model only when it demonstrates a measurable advantage over a simpler alternative.
+- **Optimize reliability versus speed:** Reduce latency without sacrificing correctness or user trust.
 
-## 11. How to Run the Evaluation
+These principles will guide the next iteration of the prototype.
 
-### Prerequisites
+## 9. Repository Contents
 
-Python and the following packages are required:
+The current repository contains scripts for:
+- Dataset generation and exploration.
+- Failure diagnosis and model training.
+- Recovery recommendation and simulation.
+- Independent-scenario, action-mapping, and pipeline evaluation.
+- Edge-case and scenario checks.
 
-```bash
-pip install pandas scikit-learn
-```
+It also contains synthetic CSV datasets, generated reports, and a Decision Tree visualization. The repository currently includes multiple experimental script versions; consolidation into a smaller, tested package is planned.
 
-### Run the independent model evaluation
+See the repository file list for the current source of truth. The codebase structure will be updated as the refactor progresses.
 
-From the project root:
+## 10. Running the Existing Evaluation
 
-```bash
+Run these commands from the repository root using Python:
+
+```powershell
+py -m pip install pandas scikit-learn
 py evaluate_independent_model.py
-```
-
-This evaluates the Decision Tree on the independent scenario dataset and saves the prediction report.
-
-### Run the recovery-action evaluation
-
-```bash
 py evaluate_recovery_actions.py
 ```
 
-This evaluates predicted diagnoses against expected diagnoses, checks recovery-action mappings, and generates:
+These commands run the current scenario and recovery-action evaluations. They do not establish production model performance or real recovery success.
 
-`data/recovery_action_evaluation.csv`
+The scripts and their output files will be consolidated and documented as the project is refactored.
 
-## 12. Limitations
+## 11. Roadmap
 
-- The training data is synthetic rather than collected from real AI agent conversations.
-- The independent evaluation contains only 12 designed scenarios.
-- The test cases use the same input features as the training dataset.
-- The current feature set does not capture the full context of a conversation.
-- Recovery actions are predefined recommendations rather than executable operations.
-- Simulation outcomes do not establish actual recovery success.
-- The current evaluation does not measure real customer satisfaction, task completion, or production reliability.
+### Reliability and correctness
+- Validate missing, malformed, and negative latency values.
+- Define explicit behavior for overlapping failure signals.
+- Remove sample-specific context detection.
+- Standardize recovery-action names and decision rules.
+- Make scripts reproducible regardless of the working directory.
 
-These limitations define the next opportunities for development.
+### Evaluation quality
+- Build a transparent rules baseline.
+- Introduce realistic variation and overlapping synthetic failures.
+- Document labeling rules and latency assumptions with appropriate sources.
+- Add a held-out test set, failure-specific metrics, and automated tests.
+- Evaluate incorrect, unnecessary, and unsafe recovery decisions.
 
-## 13. Future Improvements
+### Product analytics
+- Build a Streamlit dashboard for failure distribution and recovery outcomes.
+- Rank failures by frequency, severity, and estimated impact.
+- Define a metric tree connecting failure detection to task completion.
+- Add SQL-based analysis if a structured event database is introduced.
+- Document the event schema and data needed to evaluate a real deployment.
 
-1. Evaluate the model on real or carefully anonymized and manually labeled conversation logs.
-2. Expand the feature set to include retry counts, tool error codes, task-completion status, and conversation context.
-3. Create a richer failure taxonomy that accounts for overlapping and ambiguous failures.
-4. Evaluate precision, recall, and the confusion matrix on a larger, genuinely independent dataset.
-5. Track recovery outcomes using measures such as task-completion rate, repeat-failure rate, and unnecessary-recovery rate.
-6. Introduce confidence thresholds and human review for uncertain predictions.
-7. Integrate with a sandbox AI agent to test recovery recommendations under controlled conditions.
+### Real-world validation
+- Define a labeling guide for human-reviewed failure examples.
+- Identify privacy and anonymization requirements for conversation logs.
+- Compare offline evaluation against controlled sandbox experiments.
+- Measure task outcomes before making claims about customer or business impact.
 
-## 14. Key Takeaway
+## 12. What Success Would Look Like
 
-This project explores a practical reliability problem in AI products: connecting failure diagnosis to an actionable recovery recommendation.
+A stronger version of this project would demonstrate that it can:
+1. Identify failure patterns without relying on sample-specific rules.
+2. Recommend actions that follow explicit safety constraints.
+3. Compare ML with a simpler baseline using a meaningful evaluation.
+4. Explain which failure types deserve product attention and why.
+5. Measure recovery outcomes rather than treating diagnosis accuracy as the final goal.
 
-Its main contribution is the integration of classification, recovery-action mapping, simulation, and evaluation into a single prototype workflow. The current results validate the defined scenarios and mapping logic; real-world performance remains to be tested.
+## 13. Limitations
 
-The project demonstrates an initial approach to thinking about AI agent reliability from both a technical and a product-evaluation perspective.
+- The data is synthetic, not collected from real customer conversations.
+- The current evaluation set is small and may share the assumptions used to generate the labels.
+- The current classifier uses a limited set of features and predicts one category at a time.
+- Recovery outcomes are simulated rather than observed.
+- No production integration, live dashboard, or real-user impact measurement is currently claimed.
+- The reported scenario results do not establish generalization to real-world voice AI systems.
+
+These limitations are part of the project scope and define the experiments needed before stronger claims can be made.
+
+## Final Note
+
+Call-Fall Recovery Lab is an evolving exploration of AI product reliability: connecting failure signals to safer recovery decisions and, ultimately, measurable user outcomes.
+
+The central question is not simply whether a model can predict a failure category. It is whether the overall system can help users complete their tasks more reliably, without introducing unnecessary or unsafe actions.
